@@ -22,15 +22,22 @@ namespace 条码识别
             else
             {
                 var fileName = args[0];
+                var type = ZBar.SymbolType.CODE128;
+                if (args.Length > 1)
+                {
+                    try
+                    {
+                        type = (ZBar.SymbolType)Convert.ToInt32(args[1]);
+                    }
+                    catch (Exception) { }
+                }
                 DateTime now = DateTime.Now;
                 Image primaryImage = Image.FromFile(fileName);
 
                 Bitmap pImg = MainForm.MakeGrayscale3((Bitmap)primaryImage);
                 using (ZBar.ImageScanner scanner = new ZBar.ImageScanner())
                 {
-                    //scanner.SetConfiguration(ZBar.SymbolType.None, ZBar.Config.Enable, 0);
-                    //scanner.SetConfiguration(ZBar.SymbolType.CODE39, ZBar.Config.Enable, 1);
-                    scanner.SetConfiguration(ZBar.SymbolType.CODE128, ZBar.Config.Enable, 1);
+                    scanner.SetConfiguration(type, ZBar.Config.Enable, 1);
 
                     List<ZBar.Symbol> symbols = new List<ZBar.Symbol>();
                     symbols = scanner.Scan((Image)pImg);

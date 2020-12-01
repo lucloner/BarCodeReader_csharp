@@ -38,7 +38,7 @@ namespace 条码识别
                 scanner.SetConfiguration(ZBar.SymbolType.None, ZBar.Config.Enable, 0);
                 scanner.SetConfiguration(ZBar.SymbolType.CODE39, ZBar.Config.Enable, 1);
                 scanner.SetConfiguration(ZBar.SymbolType.CODE128, ZBar.Config.Enable, 1);
-
+                scanner.SetConfiguration(ZBar.SymbolType.QRCODE, ZBar.Config.Enable, 1);
                 List<ZBar.Symbol> symbols = new List<ZBar.Symbol>();
                 symbols = scanner.Scan((Image)pImg);
 
