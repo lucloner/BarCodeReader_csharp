@@ -20,6 +20,18 @@ namespace 条码识别
 
             if (dr == DialogResult.OK)
             {
+                if (checkBox1.Checked)
+                {
+                    var s = Program.zxing(fileDialog.FileName, 16);
+                    MessageBox.Show($"结果:{s}");
+                    return;
+                }
+                if (checkBox2.Checked)
+                {
+                    var s = Program.checkBarcode(fileDialog.FileName,0);
+                    MessageBox.Show($"结果:{string.Join(",",s)}");
+                    return;
+                }
                 ScanBarCode(fileDialog.FileName);
             }
         }
