@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using ZXing;
 
@@ -22,6 +23,16 @@ namespace 条码识别
                 return;
             }
             var fileName = args[0];
+            var fileNames = new string[0];
+            var isBach = fileName.ToLower().EndsWith("txt");
+            if (isBach)
+            {
+                fileNames = File.ReadAllLines(fileName);
+            }
+            else
+            {
+                fileNames =new string[]{ fileName};
+            }
             var type = ZBar.SymbolType.CODE128;
             var module = "zbar";
             if (args.Length > 1)
@@ -36,49 +47,59 @@ namespace 条码识别
                 }
             }
             DateTime now = DateTime.Now;
-            string result = "null";
-            switch (module)
+            for(var i = 0; i < fileNames.Length; i++)
             {
-                case "zbar":
-                    Image primaryImage = Image.FromFile(fileName);
-                    Bitmap pImg = MainForm.MakeGrayscale3((Bitmap)primaryImage);
-                    using (ZBar.ImageScanner scanner = new ZBar.ImageScanner())
-                    {
-                        scanner.SetConfiguration(type, ZBar.Config.Enable, 1);
-
-                        List<ZBar.Symbol> symbols = new List<ZBar.Symbol>();
-                        symbols = scanner.Scan((Image)pImg);
-
-                        if (symbols != null && symbols.Count > 0)
+                var fn = fileNames[i];
+                string result = "null";
+                switch (module)
+                {
+                    case "zbar":
+                        Image primaryImage = Image.FromFile(fn);
+                        Bitmap pImg = MainForm.MakeGrayscale3((Bitmap)primaryImage);
+                        using (ZBar.ImageScanner scanner = new ZBar.ImageScanner())
                         {
-                            result = string.Empty;
-                            symbols.ForEach(s => result += $"条码内容:{s.Data} 条码质量:{s.Quality}{Environment.NewLine}");
+                            scanner.SetConfiguration(type, ZBar.Config.Enable, 1);
+
+                            List<ZBar.Symbol> symbols = new List<ZBar.Symbol>();
+                            symbols = scanner.Scan((Image)pImg);
+
+                            if (symbols != null && symbols.Count > 0)
+                            {
+                                result = string.Empty;
+                                symbols.ForEach(s => result += $"条码内容:{s.Data} 条码质量:{s.Quality}{Environment.NewLine}");
+                            }
                         }
-                    }
-                    break;
-                case "zxing":
-                    var zx = zxing(fileName, 0);
-                    result = string.Empty;
-                    result += "条码内容:" + zx;
-                    break;
-                case "softech":
-                    var softech = checkBarcode(fileName, 0);
-                    result = string.Empty;
-                    foreach(var s in softech)
-                    {
-                        result += $"条码内容:{s}\n";
-                    }
-                    break;
-                case "softech2":
-                    var softech2 = checkBarcode(fileName, 2);
-                    result = string.Empty;
-                    foreach (var s in softech2)
-                    {
-                        result += $"条码内容:{s}\n";
-                    }
-                    break;
+                        break;
+                    case "zxing":
+                        var zx = zxing(fn, 0);
+                        result = string.Empty;
+                        result += "条码内容:" + zx;
+                        break;
+                    case "softech":
+                        var softech = checkBarcode(fn, 0);
+                        result = string.Empty;
+                        foreach (var s in softech)
+                        {
+                            result += $"条码内容:{s}{Environment.NewLine}";
+                        }
+                        break;
+                    case "softech2":
+                        var softech2 = checkBarcode(fn, 2);
+                        result = string.Empty;
+                        foreach (var s in softech2)
+                        {
+                            result += $"条码内容:{s}{Environment.NewLine}";
+                        }
+                        break;
+                }
+                Console.WriteLine(result);
+                if (isBach)
+                {
+                    result = $"{fn.Replace(":","_")}={result.Replace(Environment.NewLine, ",")}";
+                    fileNames[i] = result;
+                    File.WriteAllLines(fileName, fileNames);
+                }
             }
-            Console.WriteLine(result);
 #if DEBUG
             Console.ReadKey();
 #endif
